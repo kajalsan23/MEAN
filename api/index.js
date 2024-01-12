@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from 'dotenv';
 import roleRoute from './routes/role.js';
-import userRoute from './routes/auth.js';
+import authRoute from './routes/auth.js';
 const app = express();
 
 dotenv.config();
@@ -27,7 +27,7 @@ dotenv.config();
 
 app.use(express.json())
 app.use('/api/role',roleRoute)
-app.use('/api/register',userRoute)
+app.use('/api/auth',authRoute)
 
 const dbConnection = async () => {
     try {

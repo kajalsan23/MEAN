@@ -11,22 +11,20 @@ const userSchema = mongoose.Schema({
         require:true
     },
 
-    UserName:{
+    userName:{
         type:String,
         require:true,
-        unique:true
+        unique:false
     },
 
-    Email:{
+    email:{
         type:String,
         require:true,
-        unique:true
     },
 
-    Password:{
+    password:{
         type:String,
         require:true,
-        unique:true
     },
 
     ProfileImage:{
