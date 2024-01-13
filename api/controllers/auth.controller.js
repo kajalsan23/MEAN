@@ -1,6 +1,9 @@
 import User from "../models/User.js";
 import Role from "../models/Role.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { createError } from "../utils/error.js";
+import { createSuccess } from "../utils/success.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -16,15 +19,21 @@ export const register = async (req, res, next) => {
       roles: role,
     });
     await newUser.save();
-    return res.status(200).send("User is Created");
+    return next(createSuccess(200, "User Created SuccessFully..!"));
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    return next(createError(500, "Internal Server Error"));
   }
 };
 
 export const login = async (req, res, next) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: req.body.email }).populate(
+      "roles",
+      "role"
+    );
+
+    const { roles } = user;
+
     if (!user) {
       return res.status(404).send("User Not found");
     }
@@ -32,11 +41,47 @@ export const login = async (req, res, next) => {
       req.body.password,
       user.password
     );
-     if (!isPasswordCorrect) {
-      return res.status(400).send("password is Incorrect");
+    if (!isPasswordCorrect) {
+      return next(createError(400, "password is Incorrect..!"));
     }
-    return res.status(200).send("Login Success");
+
+    const token = jwt.sign(
+      { id: user_id, isAdmin: user.isAdmin, roles: roles },
+      process.env.JWT_SECRET
+    );
+    res.cookies("access_token", token, { httpOnly: true }).status(200).json({
+      status: 200,
+      message: "login Success",
+      data: user,
+    });
+
+    // return next(createSuccess(200, "Login Success..!"));
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    return next(createSuccess(500, "Internal Server Error..!"));
   }
 };
+
+export const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({});
+
+    return next(createSuccess(200, users));
+  } catch (error) {}
+};
+
+// get name from get method
+
+export const findByName = async (req, res, next) => {
+  try {
+    console.log(req.params);
+
+    const findName = await User.find({ firstName: req.params.name });
+    return next(createSuccess(200, findName));
+  } catch (error) {
+    return next(createError(500, error));
+  }
+};
+
+
+// get name from post method
+
