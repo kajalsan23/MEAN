@@ -64,7 +64,6 @@ export const login = async (req, res, next) => {
 export const getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
-
     return next(createSuccess(200, users));
   } catch (error) {}
 };
@@ -82,6 +81,26 @@ export const findByName = async (req, res, next) => {
   }
 };
 
-
 // get name from post method
 
+export const findByNameUsingPost = async (req, res, next) => {
+  try {
+    const findName = await User.find({ firstName: req.body.firstName });
+
+    return next(createSuccess(200, findName));
+  } catch (error) {
+    return next(createError(500, error));
+  }
+};
+
+
+
+export const searchFunctionality = async (req,res,next)=>{
+ try {
+  const findName = req.params.name;
+  const objs = await User.find({ firstName: { $regex: new RegExp('.*' + findName + '.*', 'i') } })
+  return next(createSuccess(200,objs))
+ } catch (error) {
+  return next(createError(500,error))
+ }
+}

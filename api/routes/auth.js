@@ -1,5 +1,5 @@
 import express from 'express';
-import {findByName, getAllUsers, login, register} from '../controllers/auth.controller.js';
+import {findByName, findByNameUsingPost, getAllUsers, login, register, searchFunctionality} from '../controllers/auth.controller.js';
 
 const router = express.Router();
 
@@ -18,8 +18,16 @@ router.post('/login', login)
 
 router.get('/getAllUsers',getAllUsers);
 
-//getByAllUsers
+//getUsersByName
 
 router.get('/getByUser/:name',findByName)
+
+//getUserbynamePost
+
+router.post('/getByUser',findByNameUsingPost)
+
+//Search Functionality
+
+router.get('/search/:name',searchFunctionality);
 
 export default router;
