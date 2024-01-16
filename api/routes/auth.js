@@ -1,5 +1,5 @@
 import express from 'express';
-import {findByName, findByNameUsingPost, getAllUsers, login, register, searchFunctionality} from '../controllers/auth.controller.js';
+import {findByName, findByNameUsingPost, getAllUsers, login, register, registerAdmin, searchFunctionality} from '../controllers/auth.controller.js';
 
 const router = express.Router();
 
@@ -8,6 +8,9 @@ const router = express.Router();
 
 router.post('/register',register);
 
+// register as admin
+
+router.post('/register-admin',registerAdmin)
 
 // login
 

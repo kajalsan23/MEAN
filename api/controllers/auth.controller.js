@@ -25,18 +25,42 @@ export const register = async (req, res, next) => {
   }
 };
 
+
+export const registerAdmin = async (req, res, next) => {
+  try {
+    const role = await Role.find({});
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(req.body.password, salt);
+    const newUser = new User({
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      userName: req.body.userName,
+      email: req.body.email,
+      password: hashPassword,
+      isAdmin:true,
+      roles: role,
+    });
+    await newUser.save();
+    return next(createSuccess(200, "Admin Created SuccessFully..!"));
+  } catch (error) {
+    return next(createError(500, "Internal Server Error"));
+  }
+};
+
+
+
 export const login = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email }).populate(
-      "roles",
-      "role"
-    );
-
+      "roles",  "role");
     const { roles } = user;
-
     if (!user) {
       return res.status(404).send("User Not found");
     }
+
+    user._id = user._id.toHexString();
+
+    console.log(user,"user");
     const isPasswordCorrect = await bcrypt.compare(
       req.body.password,
       user.password
@@ -44,12 +68,14 @@ export const login = async (req, res, next) => {
     if (!isPasswordCorrect) {
       return next(createError(400, "password is Incorrect..!"));
     }
-
+    console.log(isPasswordCorrect,"isPassword");
     const token = jwt.sign(
-      { id: user_id, isAdmin: user.isAdmin, roles: roles },
+      { id: user._id, isAdmin: user.isAdmin, roles: roles },
       process.env.JWT_SECRET
     );
-    res.cookies("access_token", token, { httpOnly: true }).status(200).json({
+
+    console.log(token);
+    res.cookie("access_token", token, { httpOnly: true }).status(200).json({
       status: 200,
       message: "login Success",
       data: user,
@@ -57,6 +83,7 @@ export const login = async (req, res, next) => {
 
     // return next(createSuccess(200, "Login Success..!"));
   } catch (error) {
+    console.log(error);
     return next(createSuccess(500, "Internal Server Error..!"));
   }
 };
@@ -93,14 +120,14 @@ export const findByNameUsingPost = async (req, res, next) => {
   }
 };
 
-
-
-export const searchFunctionality = async (req,res,next)=>{
- try {
-  const findName = req.params.name;
-  const objs = await User.find({ firstName: { $regex: new RegExp('.*' + findName + '.*', 'i') } })
-  return next(createSuccess(200,objs))
- } catch (error) {
-  return next(createError(500,error))
- }
-}
+export const searchFunctionality = async (req, res, next) => {
+  try {
+    const findName = req.params.name;
+    const objs = await User.find({
+      firstName: { $regex: new RegExp(".*" + findName + ".*", "i") },
+    });
+    return next(createSuccess(200, objs));
+  } catch (error) {
+    return next(createError(500, error));
+  }
+};
